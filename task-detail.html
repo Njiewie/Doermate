@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Task Details</h2>
+
+        <div id="task-details">
+            <!-- Task information will load here -->
+        </div>
+
+        <div id="chat-customer-section" style="display:none; margin-top:20px;">
+            <button id="chat-customer-btn" style="padding:10px 20px; background-color:#004aad; color:white; border:none; border-radius:5px; cursor:pointer;">
+                Chat with Customer
+            </button>
+        </div>
+
+        <div id="apply-task-section" style="display:none; margin-top:20px;">
+            <button id="apply-task-btn" style="padding:10px 20px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">
+                Apply for This Task
+            </button>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const taskDetailsDiv = document.getElementById('task-details');
+        const chatCustomerSection = document.getElementById('chat-customer-section');
+        const applyTaskSection = document.getElementById('apply-task-section');
+        const applyTaskBtn = document.getElementById('apply-task-btn');
+        const chatCustomerBtn = document.getElementById('chat-customer-btn');
+        const taskId = localStorage.getItem('selectedTaskId');
+
+        function loadTaskDetail() {
+            if (!taskId) {
+                alert('No task selected.');
+                window.location.href = 'available-tasks.html';
+                return;
+            }
+
+            db.collection('tasks').doc(taskId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const task = doc.data();
+                        taskDetailsDiv.innerHTML = `
+                                <h3>${task.title}</h3>
+                                <p><strong>Description:</strong> ${task.description}</p>
+                                <p><strong>Price:</strong> $${task.price}</p>
+                                <p><strong>Location:</strong> ${task.location}</p>
+                                <p><strong>Posted:</strong> ${task.createdAt?.toDate().toLocaleString() || 'N/A'}</p>
+                            `;
+
+                        chatCustomerSection.style.display = 'block'; // Show Chat Button
+                    } else {
+                        taskDetailsDiv.innerHTML = '<p>Task not found.</p>';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading task details:', error);
+                    taskDetailsDiv.innerHTML = '<p>Error loading task.</p>';
+                });
+        }
+
+        window.onload = function () {
+            checkLoginStatus();
+            loadTaskDetail();
+            setupRoleBasedActions();
+        };
+
+        if (chatCustomerBtn) {
+            chatCustomerBtn.addEventListener('click', function () {
+                window.location.href = 'task-chat.html';
+            });
+        }
+
+        function setupRoleBasedActions() {
+            auth.onAuthStateChanged(function (user) {
+                if (user) {
+                    db.collection('users').doc(user.uid).get().then(function (doc) {
+                        if (doc.exists) {
+                            const userRole = doc.data().role;
+
+                            if (userRole === 'doer') {
+                                applyTaskSection.style.display = 'block';
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        if (applyTaskBtn) {
+            applyTaskBtn.addEventListener('click', function () {
+                const user = auth.currentUser;
+                if (!user || !taskId) {
+                    alert('Error: Missing user or task.');
+                    return;
+                }
+
+                db.collection('applications').doc(taskId).collection('applicants').doc(user.uid).set({
+                    applicantEmail: user.email,
+                    appliedAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                    .then(function () {
+                        alert('You have successfully applied for this task!');
+                        applyTaskBtn.disabled = true;
+                        applyTaskBtn.innerText = "Already Applied";
+                    })
+                    .catch(function (error) {
+                        alert('Error applying for task: ' + error.message);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

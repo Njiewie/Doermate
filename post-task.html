@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Task - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNbKPDM4Ph-kjlqqDPvBXPphPANmVSs4E&libraries=places"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="post-task.html">Post a Task</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <a href="admin.html" id="admin-link" style="display: none;">Admin Dashboard</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2 id="welcome-banner"></h2>
+
+        <section class="post-task">
+            <h2>Post a New Task</h2>
+            <form id="task-form">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" required>
+
+                <label for="description">Task Description</label>
+                <textarea id="description" name="description" required></textarea>
+
+                <label for="price">Proposed Price ($)</label>
+                <input type="number" id="price" name="price" required>
+
+                <label for="location">Location (City/Suburb)</label>
+                <input type="text" id="location" name="location" required>
+
+                <label for="image">Upload Image (optional)</label>
+                <input type="file" id="image" name="image" accept="image/*">
+
+                <button type="submit">Submit Task</button>
+            </form>
+
+        </section>
+    </main>
+
+    <!-- Loading Animation -->
+    <div id="loading" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:bold; color:#004aad; z-index:9999;">
+        Posting Task...
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let selectedCity = "";
+        let selectedCountry = "";
+        let selectedLat = "";
+        let selectedLng = "";
+
+        function initAutocomplete() {
+            const locationInput = document.getElementById('location');
+            if (locationInput) {
+                const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                    types: ['geocode'],
+                    componentRestrictions: { country: [] }
+                });
+
+                autocomplete.addListener('place_changed', function () {
+                    const place = autocomplete.getPlace();
+                    if (!place.geometry) {
+                        alert("No details available for input: '" + place.name + "'");
+                        return;
+                    }
+
+                    selectedCity = "";
+                    selectedCountry = "";
+                    selectedLat = place.geometry.location.lat();
+                    selectedLng = place.geometry.location.lng();
+
+                    place.address_components.forEach(component => {
+                        const types = component.types;
+
+                        if (types.includes('locality')) {
+                            selectedCity = component.long_name;
+                        }
+                        if (types.includes('country')) {
+                            selectedCountry = component.long_name;
+                        }
+                    });
+
+                    console.log("City:", selectedCity);
+                    console.log("Country:", selectedCountry);
+                    console.log("Lat:", selectedLat, "Lng:", selectedLng);
+                });
+            }
+        }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNbKPDM4Ph-kjlqqDPvBXPphPANmVSs4E&libraries=places"></script>
+
+
+</body>
+</html>

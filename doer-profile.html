@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doer Profile - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="my-tasks.html">My Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Doer Profile</h2>
+
+        <div id="doer-info" style="margin-top:20px;"></div>
+
+        <h3 style="margin-top:30px;">Reviews</h3>
+        <div id="reviews-list" style="margin-top:10px;">
+            <!-- Reviews will load here -->
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const doerInfoDiv = document.getElementById('doer-info');
+        const reviewsList = document.getElementById('reviews-list');
+        const doerUid = localStorage.getItem('selectedDoerId');
+
+        if (!doerUid) {
+            alert('No Doer selected.');
+            window.location.href = 'index.html';
+        }
+
+        function loadDoerProfile() {
+            db.collection('users').doc(doerUid).get()
+                .then(function (doc) {
+                    if (doc.exists) {
+                        const user = doc.data();
+                        doerInfoDiv.innerHTML = `
+                            <p><strong>Email:</strong> ${user.email}</p>
+                        `;
+                        loadReviews();
+                    } else {
+                        doerInfoDiv.innerHTML = '<p>Doer not found.</p>';
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error loading doer:', error);
+                    doerInfoDiv.innerHTML = '<p>Error loading doer.</p>';
+                });
+        }
+
+        function loadReviews() {
+            db.collection('tasks')
+                .where('assignedTo', '==', doerUid)
+                .where('status', '==', 'Completed')
+                .get()
+                .then(function (snapshot) {
+                    let totalStars = 0;
+                    let count = 0;
+
+                    if (snapshot.empty) {
+                        reviewsList.innerHTML = '<p>No completed tasks yet.</p>';
+                        return;
+                    }
+
+                    snapshot.forEach(function (doc) {
+                        const task = doc.data();
+
+                        if (task.reviewStars && task.reviewComment) {
+                            totalStars += task.reviewStars;
+                            count++;
+
+                            const div = document.createElement('div');
+                            div.style.marginBottom = "15px";
+                            div.style.padding = "10px";
+                            div.style.border = "1px solid #ccc";
+                            div.style.borderRadius = "5px";
+                            div.style.background = "#f9f9f9";
+
+                            div.innerHTML = `
+                                <p><strong>Rating:</strong> ${'⭐'.repeat(task.reviewStars)} (${task.reviewStars}/5)</p>
+                                <p><strong>Review:</strong> ${task.reviewComment}</p>
+                            `;
+
+                            reviewsList.appendChild(div);
+                        }
+                    });
+
+                    if (count > 0) {
+                        const avgStars = (totalStars / count).toFixed(1);
+                        doerInfoDiv.innerHTML += `<p><strong>Average Rating:</strong> ${avgStars} ⭐</p>`;
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error loading reviews:', error);
+                    reviewsList.innerHTML = '<p>Error loading reviews.</p>';
+                });
+        }
+
+        window.onload = function () {
+            loadDoerProfile();
+        };
+    </script>
+
+</body>
+</html>

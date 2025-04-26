@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hire Doer - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="search-doers.html">Search Doers</a>
+            <a href="support.html">Support Chat</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Hire Doer</h2>
+
+        <form id="hire-form" style="margin-top:20px;">
+            <label for="title">Task Title:</label><br>
+            <input type="text" id="title" name="title" required><br><br>
+
+            <label for="description">Task Description:</label><br>
+            <textarea id="description" name="description" required></textarea><br><br>
+
+            <label for="price">Proposed Price ($):</label><br>
+            <input type="number" id="price" name="price" required><br><br>
+
+            <label for="location">Location:</label><br>
+            <input type="text" id="location" name="location" required><br><br>
+
+            <button type="submit" style="padding:8px 15px; background-color:#004aad; color:white; border:none; border-radius:5px;">Create Task</button>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const hireForm = document.getElementById('hire-form');
+        const doerId = localStorage.getItem('hireDoerId');
+
+        hireForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be logged in.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const price = document.getElementById('price').value;
+            const location = document.getElementById('location').value;
+
+            db.collection('tasks').add({
+                title: title,
+                description: description,
+                price: price,
+                location: location,
+                userId: user.uid,
+                assignedTo: doerId,
+                status: 'Assigned',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert('Task created and assigned to Doer!');
+                window.location.href = 'my-tasks.html';
+            })
+            .catch((error) => {
+                alert('Error creating task: ' + error.message);
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -5,31 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DoerMate - Find Help Fast</title>
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
 </head>
+
 <body>
     <header>
         <h1>DoerMate</h1>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">Post a Task</a>
-            <a href="#">Browse Tasks</a>
+            <a href="index.html">Home</a>
+            <a href="post-task.html" id="post-task-link" style="display:none;">Post a Task</a>
+            <a href="available-tasks.html" id="available-tasks-link" style="display:none;">Find Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <a href="admin.html" id="admin-link" style="display: none;">Admin Dashboard</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
         </nav>
+
     </header>
 
     <main>
+        <h2 id="welcome-banner"></h2>
+
+        <!-- Hero Section -->
         <section class="hero">
-            <h2>Get Help for Anything, Anytime</h2>
-            <p>Find trusted Doers to help you with your tasks.</p>
-            <button onclick="alert('Post a Task Coming Soon!')">Post a Task</button>
+            <h2>Find Help Fast, Anytime, Anywhere</h2>
+            <p>Post a task and get matched with trusted Doers ready to help you out.</p>
+            <button onclick="window.location.href='post-task.html'">Post a Task</button>
         </section>
 
+        <!-- How It Works Section -->
+        <section class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <h3>1. Post a Task</h3>
+                    <p>Describe what you need done and set your budget.</p>
+                </div>
+                <div class="step">
+                    <h3>2. Connect with Doers</h3>
+                    <p>Get offers from trusted Doers and choose the best fit.</p>
+                </div>
+                <div class="step">
+                    <h3>3. Get it Done</h3>
+                    <p>Relax while your task gets completed on time!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section class="features">
+            <h2>Why Choose DoerMate?</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <h3>Fast and Easy</h3>
+                    <p>Post your task in minutes and get instant offers.</p>
+                </div>
+                <div class="feature">
+                    <h3>Trusted Doers</h3>
+                    <p>Background-checked and reviewed Doers you can rely on.</p>
+                </div>
+                <div class="feature">
+                    <h3>Secure Payments</h3>
+                    <p>Pay securely only when the task is completed to your satisfaction.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Call to Action -->
+        <section class="call-to-action">
+            <h2>Ready to get things done?</h2>
+            <button onclick="window.location.href='signup.html'">Get Started</button>
+        </section>
+        <section class="tasks">
+            <h2>Available Tasks</h2>
+
+            <!-- Filter Controls -->
+            <div class="task-filters">
+                <select id="sort-date">
+                    <option value="newest">Sort by Newest</option>
+                    <option value="oldest">Sort by Oldest</option>
+                </select>
+
+                <select id="sort-price">
+                    <option value="low-high">Price: Low to High</option>
+                    <option value="high-low">Price: High to Low</option>
+                </select>
+
+                <input type="text" id="filter-location" placeholder="Enter Location">
+                <button onclick="applyFilters()">Apply Filters</button>
+            </div>
+
+            <div id="task-list"></div>
+        </section>
+
+        <!-- Available Tasks Section (your original section) -->
         <section class="tasks">
             <h2>Available Tasks</h2>
             <div id="task-list"></div>
         </section>
+
     </main>
 
     <script src="script.js"></script>
 </body>
 </html>
-""

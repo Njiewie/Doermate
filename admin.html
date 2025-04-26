@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <button id="logout-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="admin-section" style="display:none;">
+            <h2>Registered Users</h2>
+            <div id="users-list"></div>
+
+            <h2>Support Chats</h2>
+            <div id="chats-list"></div>
+
+            <h2>Reply to User</h2>
+            <form id="admin-reply-form">
+                <input type="text" id="reply-to" placeholder="User Email" required><br><br>
+                <textarea id="reply-message" placeholder="Type your message..." required></textarea><br><br>
+                <button type="submit">Send Reply</button>
+            </form>
+        </section>
+
+        <section id="access-denied" style="display:none;">
+            <h2>Access Denied</h2>
+            <p>You are not authorized to view this page.</p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

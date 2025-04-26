@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="my-tasks.html">My Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>My Tasks</h2>
+
+        <div id="tasks-list" style="margin-top:20px;">
+            <!-- User tasks load here -->
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const tasksList = document.getElementById('tasks-list');
+
+        auth.onAuthStateChanged(function (user) {
+            if (!user) {
+                alert('You must be logged in.');
+                window.location.href = 'login.html';
+            } else {
+                db.collection('users').doc(user.uid).get().then(function (doc) {
+                    if (doc.exists) {
+                        const userRole = doc.data().role;
+
+                        if (userRole === 'customer') {
+                            loadCustomerTasks(user.uid);
+                        } else if (userRole === 'doer') {
+                            loadDoerTasks(user.uid);
+                        }
+                    }
+                });
+            }
+        });
+
+        function loadCustomerTasks(uid) {
+            db.collection('tasks')
+                .where('userId', '==', uid)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then(function (snapshot) {
+                    if (snapshot.empty) {
+                        tasksList.innerHTML = '<p>You have not posted any tasks yet.</p>';
+                        return;
+                    }
+
+                    snapshot.forEach(function (doc) {
+                        const task = doc.data();
+                        const div = document.createElement('div');
+                        div.style.marginBottom = "15px";
+                        div.style.padding = "10px";
+                        div.style.border = "1px solid #ccc";
+                        div.style.borderRadius = "5px";
+                        div.style.background = "#f9f9f9";
+
+                        div.innerHTML = `
+                                <h3>${task.title}</h3>
+                                <p><strong>Status:</strong> ${task.status || 'Open'}</p>
+                                <p><strong>Location:</strong> ${task.location || 'Not specified'}</p>
+                                <p><strong>Posted:</strong> ${task.createdAt?.toDate().toLocaleString() || ''}</p>
+                                ${task.status === 'CompletedByDoer' ? `
+                                    <button onclick="approveCompletion('${doc.id}')" style="margin-top:10px; padding:8px 15px; background-color:#004aad; color:white; border:none; border-radius:5px;">Approve & Leave Review</button>
+                                ` : ''}
+                            `;
+                        tasksList.appendChild(div);
+                    });
+                })
+                .catch(function (error) {
+                    console.error('Error loading tasks:', error);
+                    tasksList.innerHTML = '<p>Error loading tasks.</p>';
+                });
+        }
+
+        function loadDoerTasks(uid) {
+            db.collection('tasks')
+                .where('assignedTo', '==', uid)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then(function (snapshot) {
+                    if (snapshot.empty) {
+                        tasksList.innerHTML = '<p>No tasks assigned to you yet.</p>';
+                        return;
+                    }
+
+                    snapshot.forEach(function (doc) {
+                        const task = doc.data();
+                        const div = document.createElement('div');
+                        div.style.marginBottom = "15px";
+                        div.style.padding = "10px";
+                        div.style.border = "1px solid #ccc";
+                        div.style.borderRadius = "5px";
+                        div.style.background = "#f9f9f9";
+
+                        div.innerHTML = `
+                                <h3>${task.title}</h3>
+                                <p><strong>Status:</strong> ${task.status || 'Assigned'}</p>
+                                <p><strong>Location:</strong> ${task.location || 'Not specified'}</p>
+                                <p><strong>Assigned:</strong> ${task.createdAt?.toDate().toLocaleString() || ''}</p>
+                                ${task.status === 'Assigned' ? `
+                                    <button onclick="markTaskComplete('${doc.id}')" style="margin-top:10px; padding:8px 15px; background-color:#28a745; color:white; border:none; border-radius:5px;">Mark as Completed</button>
+                                ` : ''}
+                            `;
+                        tasksList.appendChild(div);
+                    });
+                })
+                .catch(function (error) {
+                    console.error('Error loading tasks:', error);
+                    tasksList.innerHTML = '<p>Error loading tasks.</p>';
+                });
+        }
+
+        function markTaskComplete(taskId) {
+            if (confirm("Mark this task as completed?")) {
+                db.collection('tasks').doc(taskId).update({
+                    status: 'CompletedByDoer'
+                }).then(() => {
+                    alert('Task marked as completed. Waiting for Customer Approval.');
+                    location.reload();
+                }).catch((error) => {
+                    alert('Error marking complete: ' + error.message);
+                });
+            }
+        }
+
+        function approveCompletion(taskId) {
+            const stars = prompt("Rate the Doer (1 to 5 Stars):");
+            const comment = prompt("Leave a review comment:");
+
+            if (!stars || !comment) {
+                alert("Review and stars are required.");
+                return;
+            }
+
+            db.collection('tasks').doc(taskId).update({
+                status: 'Completed',
+                reviewStars: parseInt(stars),
+                reviewComment: comment
+            })
+                .then(() => {
+                    alert('Task marked as Completed and Review saved!');
+                    location.reload();
+                })
+                .catch((error) => {
+                    alert('Error approving task: ' + error.message);
+                });
+        }
+    </script>
+</body>
+</html>

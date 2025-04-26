@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Chat - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Task Chat</h2>
+
+        <div id="chat-header" style="margin-bottom:10px; font-size:1.1rem; font-weight:bold;">
+            Chat about Task
+        </div>
+
+        <div id="chat-box" style="border:1px solid #ccc; padding:10px; height:400px; overflow-y:scroll; background-color:#f9f9f9;">
+            <!-- Chat messages appear here -->
+        </div>
+
+        <form id="chat-form" style="margin-top:10px; display:flex; gap:10px;">
+            <input type="text" id="chat-message" placeholder="Type your message..." required style="flex:1; padding:10px;">
+            <button type="submit" style="padding:10px;">Send</button>
+        </form>
+
+        <button onclick="goBackToTask()" style="margin-top:20px; padding:10px 20px; background-color:#004aad; color:white; border:none; border-radius:5px; cursor:pointer;">
+            Back to Task Details
+        </button>
+
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const chatBox = document.getElementById('chat-box');
+        const chatHeader = document.getElementById('chat-header');
+        const taskId = localStorage.getItem('selectedTaskId');
+
+        if (!taskId) {
+            alert('No task selected for chat.');
+            window.location.href = 'available-tasks.html';
+        }
+
+        function goBackToTask() {
+            window.location.href = 'task-detail.html';
+        }
+
+        auth.onAuthStateChanged(function (user) {
+            if (!user) {
+                alert('You must be logged in to chat.');
+                window.location.href = 'login.html';
+            } else {
+                // Load task details for chat header
+                db.collection('tasks').doc(taskId).get().then(function (doc) {
+                    if (doc.exists) {
+                        const task = doc.data();
+                        chatHeader.innerText = `Chat about: ${task.title}`;
+                    }
+                });
+
+                // Load chat messages
+                db.collection('chats').doc(taskId).collection('messages')
+                    .orderBy('createdAt')
+                    .onSnapshot(function (snapshot) {
+                        chatBox.innerHTML = '';
+                        snapshot.forEach(function (doc) {
+                            const message = doc.data();
+                            const div = document.createElement('div');
+                            const time = message.createdAt ? message.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                            div.style.marginBottom = "10px";
+                            div.innerHTML = `<strong>${message.sender}</strong> <small style="color:gray;">(${time})</small><br>${message.text}`;
+                            chatBox.appendChild(div);
+                        });
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    });
+
+                // Handle sending new messages
+                chatForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const message = document.getElementById('chat-message').value;
+
+                    db.collection('chats').doc(taskId).collection('messages').add({
+                        sender: user.email,
+                        text: message,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                        .then(function () {
+                            document.getElementById('chat-message').value = '';
+                        })
+                        .catch(function (error) {
+                            alert('Error sending message: ' + error.message);
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

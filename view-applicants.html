@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Applicants for Task</h2>
+        <div id="applicants-list" style="margin-top:20px;">
+            <!-- Applicants will load here -->
+        </div>
+
+        <button onclick="goBackToTask()" style="margin-top:20px; padding:10px 20px; background-color:#004aad; color:white; border:none; border-radius:5px; cursor:pointer;">
+            Back to Task Details
+        </button>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const applicantsList = document.getElementById('applicants-list');
+        const taskId = localStorage.getItem('selectedTaskId');
+
+        if (!taskId) {
+            alert('No task selected.');
+            window.location.href = 'available-tasks.html';
+        }
+
+        function goBackToTask() {
+            window.location.href = 'task-detail.html';
+        }
+
+        auth.onAuthStateChanged(function (user) {
+            if (!user) {
+                alert('You must be logged in.');
+                window.location.href = 'login.html';
+            } else {
+                db.collection('users').doc(user.uid).get().then(function (doc) {
+                    if (doc.exists && doc.data().role === 'customer') {
+                        loadApplicants();
+                    } else {
+                        alert('Only Customers can view applicants.');
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
+        });
+
+        function loadApplicants() {
+            db.collection('applications').doc(taskId).collection('applicants')
+                .orderBy('appliedAt')
+                .get()
+                .then(function (snapshot) {
+                    if (snapshot.empty) {
+                        applicantsList.innerHTML = '<p>No applicants yet.</p>';
+                        return;
+                    }
+
+                    snapshot.forEach(function (doc) {
+                        const applicant = doc.data();
+                        const div = document.createElement('div');
+                        div.style.marginBottom = "15px";
+                        div.style.padding = "10px";
+                        div.style.border = "1px solid #ccc";
+                        div.style.borderRadius = "5px";
+                        div.style.background = "#f9f9f9";
+
+                        div.innerHTML = `
+                            <p><strong>Email:</strong> ${applicant.applicantEmail}</p>
+                            <button onclick="acceptApplicant('${doc.id}', '${applicant.applicantEmail}')" style="padding:5px 15px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">
+                                Accept Applicant
+                            </button>
+                        `;
+
+                        applicantsList.appendChild(div);
+                    });
+                })
+                .catch(function (error) {
+                    console.error('Error loading applicants:', error);
+                    applicantsList.innerHTML = '<p>Error loading applicants.</p>';
+                });
+        }
+
+        function acceptApplicant(applicantId, applicantEmail) {
+            if (!confirm(`Accept ${applicantEmail} for this task?`)) {
+                return;
+            }
+
+            // Update the task document to set the accepted applicant
+            db.collection('tasks').doc(taskId).update({
+                assignedTo: applicantId,
+                assignedEmail: applicantEmail,
+                status: 'Assigned'
+            })
+            .then(function () {
+                alert(`Task assigned to ${applicantEmail} successfully!`);
+                window.location.href = 'index.html'; // Redirect after accepting
+            })
+            .catch(function (error) {
+                alert('Error assigning task: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

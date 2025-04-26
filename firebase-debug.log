@@ -1,0 +1,49 @@
+[debug] [2025-04-26T09:39:35.810Z] ----------------------------------------------------------------------
+[debug] [2025-04-26T09:39:35.813Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Etoijeck Clovis\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2025-04-26T09:39:35.814Z] CLI Version:   14.2.1
+[debug] [2025-04-26T09:39:35.814Z] Platform:      win32
+[debug] [2025-04-26T09:39:35.814Z] Node Version:  v22.14.0
+[debug] [2025-04-26T09:39:35.814Z] Time:          Sat Apr 26 2025 19:39:35 GMT+1000 (Australian Eastern Standard Time)
+[debug] [2025-04-26T09:39:35.814Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-26T09:39:36.071Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-26T09:39:36.072Z] > authorizing via signed-in user (etoijeckclovis@gmail.com)
+[debug] [2025-04-26T09:39:36.072Z] [iam] checking project doermate-bf169 for permissions ["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedatabase.instances.update","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]
+[debug] [2025-04-26T09:39:36.073Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:36.073Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:36.074Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/doermate-bf169:testIamPermissions [none]
+[debug] [2025-04-26T09:39:36.074Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/doermate-bf169:testIamPermissions x-goog-quota-user=projects/doermate-bf169
+[debug] [2025-04-26T09:39:36.075Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/doermate-bf169:testIamPermissions {"permissions":["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedatabase.instances.update","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2025-04-26T09:39:36.686Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/doermate-bf169:testIamPermissions 200
+[debug] [2025-04-26T09:39:36.686Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/doermate-bf169:testIamPermissions {"permissions":["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedatabase.instances.update","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2025-04-26T09:39:36.687Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:36.687Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:36.687Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 [none]
+[debug] [2025-04-26T09:39:37.271Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 200
+[debug] [2025-04-26T09:39:37.271Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 {"projectId":"doermate-bf169","projectNumber":"473869183821","displayName":"DoerMate","name":"projects/doermate-bf169","resources":{"hostingSite":"doermate-bf169","realtimeDatabaseInstance":"doermate-bf169-default-rtdb"},"state":"DELETED","etag":"1_39a27a8d-fb3c-4b9b-9ac8-e37a891896f2"}
+[debug] [2025-04-26T09:39:37.271Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:37.271Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:37.272Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 [none]
+[debug] [2025-04-26T09:39:37.664Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 200
+[debug] [2025-04-26T09:39:37.665Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/doermate-bf169 {"projectId":"doermate-bf169","projectNumber":"473869183821","displayName":"DoerMate","name":"projects/doermate-bf169","resources":{"hostingSite":"doermate-bf169","realtimeDatabaseInstance":"doermate-bf169-default-rtdb"},"state":"DELETED","etag":"1_39a27a8d-fb3c-4b9b-9ac8-e37a891896f2"}
+[info] 
+[info] === Deploying to 'doermate-bf169'...
+[info] 
+[info] i  deploying database, storage, hosting, dataconnect 
+[info] i  database: checking rules syntax... 
+[debug] [2025-04-26T09:39:37.677Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:37.678Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:37.678Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/doermate-bf169/locations/-/instances/doermate-bf169-default-rtdb [none]
+[debug] [2025-04-26T09:39:39.063Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/doermate-bf169/locations/-/instances/doermate-bf169-default-rtdb 200
+[debug] [2025-04-26T09:39:39.063Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/doermate-bf169/locations/-/instances/doermate-bf169-default-rtdb {"name":"projects/473869183821/locations/asia-southeast1/instances/doermate-bf169-default-rtdb","project":"projects/473869183821","databaseUrl":"https://doermate-bf169-default-rtdb.asia-southeast1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[debug] [2025-04-26T09:39:39.064Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:39.064Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:39.064Z] >>> [apiv2][query] PUT https://doermate-bf169-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json dryRun=true
+[debug] [2025-04-26T09:39:39.064Z] >>> [apiv2][body] PUT https://doermate-bf169-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json "{\n  /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */\n  \"rules\": {\n    \".read\": false,\n    \".write\": false\n  }\n}"
+[debug] [2025-04-26T09:39:39.515Z] <<< [apiv2][status] PUT https://doermate-bf169-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json 401
+[debug] [2025-04-26T09:39:39.515Z] <<< [apiv2][body] PUT https://doermate-bf169-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json {"error":"Unauthorized request."}
+[debug] [2025-04-26T09:39:39.515Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2025-04-26T09:39:39.515Z] Checked if tokens are valid: true, expires at: 1745663777859
+[debug] [2025-04-26T09:39:39.515Z] Checked if tokens are valid: true, expires at: 1745663777859
+[error] 
+[error] Error: Unexpected error while deploying database rules.

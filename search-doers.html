@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Doers - DoerMate</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgWzROv0dPERxkuJK3KsIu0tPqPDVBhOo",
+            authDomain: "doermate-acdbb.firebaseapp.com",
+            projectId: "doermate-acdbb",
+            storageBucket: "doermate-acdbb.appspot.com",
+            messagingSenderId: "25626695663",
+            appId: "1:25626695663:web:f41d5de7e554ffa395881a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <h1>DoerMate</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="available-tasks.html">Find Tasks</a>
+            <a href="my-tasks.html">My Tasks</a>
+            <a href="search-doers.html">Search Doers</a>
+            <a href="support.html">Support Chat</a>
+            <a href="login.html" id="login-link">Login</a>
+            <a href="signup.html" id="signup-link">Sign Up</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Search Doers</h2>
+
+        <div style="margin-top:20px;">
+            <label for="location">Location:</label>
+            <input type="text" id="search-location" placeholder="City/Suburb">
+
+            <label for="rating" style="margin-left:20px;">Minimum Rating:</label>
+            <select id="search-rating">
+                <option value="">Any</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars & Up</option>
+                <option value="3">3 Stars & Up</option>
+            </select>
+
+            <button onclick="searchDoers()" style="margin-left:20px; padding:5px 15px; background-color:#004aad; color:white; border:none; border-radius:5px;">Search</button>
+        </div>
+
+        <div id="doers-list" style="margin-top:30px;">
+            <!-- Doers will load here -->
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        const doersList = document.getElementById('doers-list');
+
+        function searchDoers() {
+            const locationInput = document.getElementById('search-location').value.trim().toLowerCase();
+            const ratingInput = document.getElementById('search-rating').value;
+
+            doersList.innerHTML = "<p>Loading...</p>";
+
+            db.collection('users')
+                .where('role', '==', 'doer')
+                .get()
+                .then(snapshot => {
+                    doersList.innerHTML = "";
+
+                    snapshot.forEach(doc => {
+                        const user = doc.data();
+                        const uid = doc.id;
+
+                        let matchesLocation = true;
+                        let matchesRating = true;
+
+                        if (locationInput && (!user.location || !user.location.toLowerCase().includes(locationInput))) {
+                            matchesLocation = false;
+                        }
+
+                        if (ratingInput) {
+                            db.collection('tasks')
+                                .where('assignedTo', '==', uid)
+                                .where('status', '==', 'Completed')
+                                .get()
+                                .then(tasksSnap => {
+                                    let totalStars = 0;
+                                    let count = 0;
+
+                                    tasksSnap.forEach(taskDoc => {
+                                        const task = taskDoc.data();
+                                        if (task.reviewStars) {
+                                            totalStars += task.reviewStars;
+                                            count++;
+                                        }
+                                    });
+
+                                    const avgRating = count > 0 ? (totalStars / count) : 0;
+
+                                    if (ratingInput && avgRating < parseInt(ratingInput)) {
+                                        matchesRating = false;
+                                    }
+
+                                    if (matchesLocation && matchesRating) {
+                                        createDoerCard(user, uid, avgRating);
+                                    }
+                                });
+                        } else {
+                            if (matchesLocation) {
+                                createDoerCard(user, uid, 0);
+                            }
+                        }
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error searching doers:', error);
+                    doersList.innerHTML = '<p>Error searching doers.</p>';
+                });
+        }
+
+        function createDoerCard(user, uid, avgRating) {
+            const div = document.createElement('div');
+            div.style.marginBottom = "15px";
+            div.style.padding = "10px";
+            div.style.border = "1px solid #ccc";
+            div.style.borderRadius = "5px";
+            div.style.background = "#f9f9f9";
+
+            div.innerHTML = `
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    ${avgRating ? `<p><strong>Average Rating:</strong> ${avgRating.toFixed(1)} ⭐</p>` : ''}
+                    <button onclick="viewDoerProfile('${uid}')" style="margin-top:10px; padding:5px 15px; background-color:#28a745; color:white; border:none; border-radius:5px;">View Profile</button>
+                    <button onclick="hireDoerNow('${uid}')" style="margin-top:10px; margin-left:10px; padding:5px 15px; background-color:#ff9900; color:white; border:none; border-radius:5px;">Hire Now</button>
+                `;
+
+            doersList.appendChild(div);
+        }
+
+        function viewDoerProfile(uid) {
+            localStorage.setItem('selectedDoerId', uid);
+            window.location.href = 'doer-profile.html';
+        }
+
+        function hireDoerNow(uid) {
+            localStorage.setItem('hireDoerId', uid);
+            window.location.href = 'hire-doer.html';
+        }
+    </script>
+
+</body>
+</html>
